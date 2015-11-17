@@ -5,6 +5,10 @@ angular.module('eWebApp')
     $scope.menu = [{
       'title': 'Home',
       'link': '/'
+    },
+    { 
+      'title': 'Chat',
+      'link': '/chat'
     }];
 
     $scope.isCollapsed = true;
