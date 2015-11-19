@@ -17,6 +17,8 @@ app.use(express.static(__dirname + '/public'));
 // usernames which are currently connected to the chat
 var usernames = {};
 var numUsers = 0;
+//list of users online
+var allUsers = [{nickname:"", color:"#000"}];
 
 io.on('connection', function (socket) {
   var addedUser = false;
@@ -24,28 +26,40 @@ io.on('connection', function (socket) {
   // when the client emits 'new message', this listens and executes
   socket.on('new message', function (data) {
     // we tell the client to execute 'new message'
-    socket.broadcast.emit('new message', {
-      username: socket.username,
-      message: data
-    });
+    if (data.to) {
+      usernames[data.to].emit('new message', {
+        username: socket.username,
+        message: data
+      });
+    } else {
+      socket.broadcast.emit('new message', {
+        username: socket.username,
+        message: data 
+      });
+    }  
   });
 
   // when the client emits 'add user', this listens and executes
   socket.on('add user', function (username) {
-    // we store the username in the socket session for this client
-    socket.username = username;
-    // add the client's username to the global list
-    usernames[username] = username;
-    ++numUsers;
-    addedUser = true;
-    socket.emit('login', {
-      numUsers: numUsers
-    });
-    // echo globally (all clients) that a person has connected
-    socket.broadcast.emit('user joined', {
-      username: socket.username,
-      numUsers: numUsers
-    });
+    if (usernames[username]) {
+      socket.emit('isAdded', {result: false});
+    } else {
+      socket.emit('isAdded', {result: true});
+      // we store the username in the socket session for this client
+      socket.username = username;
+      // add the client's username to the global list
+      usernames[username] = username;
+      ++numUsers;
+      addedUser = true;
+      allUsers.push(data);
+      // echo to the new user with number of online users
+      socket.emit('login', allUsers);
+      // echo globally (all clients) that a person has connected
+      socket.broadcast.emit('user joined', {
+        username: socket.username,
+        numUsers: numUsers
+      });
+    }
   });
 
   // when the client emits 'typing', we broadcast it to others
@@ -74,6 +88,12 @@ io.on('connection', function (socket) {
         username: socket.username,
         numUsers: numUsers
       });
+
+
+      for (var i = 0; i < allUsers.length; ++i) {
+        if (allUsers[i].username === socket.username)
+          allUsers.splice(i, 1);
+      }
     }
   });
 });

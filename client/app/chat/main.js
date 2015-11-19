@@ -12,9 +12,9 @@ angular.module('eWebApp')
 
       // Initialize varibles
       var $window = $(window);
-      var $usernameInput = $('.usernameInput'); // Input for username
-      var $messages = $('.messages'); // Messages area
-      var $inputMessage = $('.inputMessage'); // Input message input box
+      var $usernameInput = $scope.user.name; // Input for username
+      var $messages = $scope.user.messages; // Messages area
+      var $inputMessage = $scope.user.inputMessage; // Input message input box
 
       var $loginPage = $('.login.page'); // The login page
       var $chatPage = $('.chat.page'); // The chatroom page
@@ -40,7 +40,7 @@ angular.module('eWebApp')
 
       // Sets the client's username
       function setUsername () {
-        username = cleanInput($usernameInput.val().trim());
+        username = $scope.user.name;
 
         // If the username is valid
         if (username) {
@@ -80,7 +80,7 @@ angular.module('eWebApp')
       // Adds the visual chat message to the message list
       $scope.addChatMessage = function(data, options) {
         // Don't fade the message in if there is an 'X was typing'
-        $scope.typingMessages = $scope.getTypingMessages(data);
+        $typingMessages = $getTypingMessages(data);
         options = options || {};
         if ($typingMessages.length !== 0) {
           options.fade = false;
